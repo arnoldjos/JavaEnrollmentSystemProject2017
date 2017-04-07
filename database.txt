@@ -1,0 +1,102 @@
+CREATE TABLE `fee` (
+  `feeId` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `feeName` varchar(45) COLLATE utf8_bin NOT NULL,
+  `feeAmount` decimal(10,0) NOT NULL,
+  PRIMARY KEY (`feeId`),
+  UNIQUE KEY `feeName_UNIQUE` (`feeName`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
+CREATE TABLE `registrar` (
+  `registrarId` int(11) NOT NULL AUTO_INCREMENT,
+  `Firstname` varchar(45) NOT NULL,
+  `Middlename` varchar(45) NOT NULL,
+  `Lastname` varchar(45) NOT NULL,
+  `Status` enum('Single','Married') NOT NULL,
+  `Password` varchar(45) NOT NULL,
+  `registrarPic` longblob,
+  PRIMARY KEY (`registrarId`)
+) ENGINE=InnoDB AUTO_INCREMENT=10003 DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `section` (
+  `sectionId` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `yearLevel` int(10) unsigned NOT NULL,
+  `sectionName` varchar(45) NOT NULL,
+  `sectionCurStud` int(11) NOT NULL DEFAULT '0',
+  `sectionMaxStud` int(11) NOT NULL,
+  `sectionIsFull` enum('No','Yes') NOT NULL DEFAULT 'No',
+  `sectionRoom` int(11) NOT NULL,
+  PRIMARY KEY (`sectionId`),
+  UNIQUE KEY `unique_index` (`yearLevel`,`sectionName`),
+  UNIQUE KEY `sectionRoom_UNIQUE` (`sectionRoom`)
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `student` (
+  `studentId` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `Firstname` varchar(45) NOT NULL,
+  `Middlename` varchar(45) NOT NULL,
+  `Lastname` varchar(45) NOT NULL,
+  `D_birth` date NOT NULL,
+  `Gender` enum('Male','Female') NOT NULL,
+  `Citizenship` varchar(45) NOT NULL,
+  `Religion` varchar(45) NOT NULL,
+  `Password` varchar(45) NOT NULL,
+  `yearLevel` int(10) unsigned NOT NULL,
+  `image` longblob,
+  `status` enum('Enrolled','Not Enrolled') NOT NULL DEFAULT 'Enrolled',
+  PRIMARY KEY (`studentId`)
+) ENGINE=InnoDB AUTO_INCREMENT=10071 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `student_account` (
+  `accountNo` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `studentId` int(10) unsigned NOT NULL,
+  `totalPayable` decimal(10,0) NOT NULL DEFAULT '0',
+  `balance` decimal(10,0) unsigned NOT NULL DEFAULT '0',
+  `paid` decimal(10,0) NOT NULL DEFAULT '0',
+  `yearLevel` int(11) NOT NULL,
+  PRIMARY KEY (`accountNo`),
+  UNIQUE KEY `studentId_UNIQUE` (`studentId`),
+  KEY `studentId_idx` (`studentId`),
+  CONSTRAINT `studentIdAccount` FOREIGN KEY (`studentId`) REFERENCES `student` (`studentId`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
+CREATE TABLE `student_bill` (
+  `billId` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `studentId` int(10) unsigned NOT NULL,
+  `feeId` int(10) unsigned NOT NULL,
+  `paid` enum('Paid','Not Paid') COLLATE utf8_bin NOT NULL DEFAULT 'Not Paid',
+  `amount` decimal(10,0) NOT NULL DEFAULT '0',
+  `billDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `amountPaid` decimal(10,0) DEFAULT '0',
+  PRIMARY KEY (`billId`),
+  KEY `feeId_idx` (`feeId`),
+  KEY `studentBillId_idx` (`studentId`),
+  CONSTRAINT `feeId` FOREIGN KEY (`feeId`) REFERENCES `fee` (`feeId`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `studentBillId` FOREIGN KEY (`studentId`) REFERENCES `student_account` (`studentId`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=360 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
+CREATE TABLE `student_section` (
+  `sectionId` int(11) unsigned NOT NULL,
+  `studentId` int(11) unsigned NOT NULL,
+  PRIMARY KEY (`studentId`),
+  KEY `sectionName_idx` (`sectionId`),
+  CONSTRAINT `sectionId` FOREIGN KEY (`sectionId`) REFERENCES `section` (`sectionId`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `studentId` FOREIGN KEY (`studentId`) REFERENCES `student` (`studentId`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+CREATE TABLE `transactions` (
+  `transactionId` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `billId` int(10) unsigned NOT NULL,
+  `studentId` int(10) unsigned NOT NULL,
+  `amount` decimal(10,0) NOT NULL,
+  `paid` decimal(10,0) NOT NULL,
+  `changeAmount` decimal(10,0) DEFAULT NULL,
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`transactionId`)
+) ENGINE=InnoDB AUTO_INCREMENT=69 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
+
